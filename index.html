@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subject PDF Portal | View & Download</title>
+  <meta name="description" content="Access, view, and download subject PDF notes and lab programs easily.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="light">
+  <!-- Background glow accents -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">DocuHub <span class="badge-pill">Subject Portal</span></h1>
+          <p class="brand-subtitle">Select a subject to view online or download</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="themeToggleBtn" class="icon-btn" aria-label="Toggle dark/light theme" title="Toggle theme">
+          <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <!-- Interactive Prompt Banner -->
+    <section class="prompt-banner" id="topPromptBanner">
+      <div class="banner-content">
+        <div class="banner-badge">Quick Action Selector</div>
+        <h2>What would you like to do?</h2>
+        <p>Choose a subject below, then decide whether you want to <strong>View</strong> it directly in your browser or <strong>Download</strong> the file to your device.</p>
+        
+        <div class="quick-selector-row">
+          <div class="select-wrapper">
+            <label for="subjectSelectDropdown" class="sr-only">Choose Subject</label>
+            <select id="subjectSelectDropdown" class="custom-select">
+              <option value="" disabled selected>— Select a Subject —</option>
+              <!-- Options populated by JS -->
+            </select>
+          </div>
+          <div class="quick-action-buttons">
+            <button id="quickViewBtn" class="btn btn-primary" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              View PDF
+            </button>
+            <button id="quickDownloadBtn" class="btn btn-secondary" disabled>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subjects Section -->
+    <section class="subjects-section">
+      <div class="section-toolbar">
+        <div>
+          <h2 class="section-title">Available Subject Files</h2>
+          <p class="section-desc">Click any card to choose between viewing and downloading</p>
+        </div>
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Search subjects or topics..." aria-label="Search subjects">
+        </div>
+      </div>
+
+      <div class="subjects-grid" id="subjectsGrid">
+        <!-- Subject cards generated dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Action Prompt Modal (Asks: View PDF or Download PDF?) -->
+  <div class="modal-backdrop" id="actionModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="closeActionModalBtn" aria-label="Close dialog">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="modal-icon-badge" id="modalSubjectIcon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+      </div>
+
+      <div class="modal-header-text">
+        <span class="modal-tag" id="modalSubjectCode">SUBJECT CODE</span>
+        <h3 class="modal-title" id="modalSubjectTitle">Subject Name</h3>
+        <p class="modal-filename" id="modalFilename">filename.pdf</p>
+      </div>
+
+      <div class="choice-prompt-box">
+        <p class="choice-title">How would you like to access this file?</p>
+        
+        <div class="action-choices">
+          <button class="action-choice-card choice-view" id="modalViewActionBtn">
+            <div class="choice-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </div>
+            <div class="choice-text">
+              <strong>View PDF</strong>
+              <span>Open and read immediately in the online viewer</span>
+            </div>
+            <div class="choice-arrow">→</div>
+          </button>
+
+          <button class="action-choice-card choice-download" id="modalDownloadActionBtn">
+            <div class="choice-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </div>
+            <div class="choice-text">
+              <strong>Download PDF</strong>
+              <span>Save a local copy to your phone or computer</span>
+            </div>
+            <div class="choice-arrow">↓</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" id="cancelModalBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- In-app PDF Viewer Modal -->
+  <div class="modal-backdrop pdf-viewer-backdrop" id="pdfViewerModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="pdf-viewer-window">
+      <div class="pdf-viewer-header">
+        <div class="pdf-info">
+          <span class="pdf-tag" id="viewerSubjectTag">SUBJECT</span>
+          <h3 class="viewer-title" id="viewerTitle">Document Title</h3>
+        </div>
+
+        <div class="pdf-toolbar-actions">
+          <a id="viewerOpenTabBtn" href="#" target="_blank" class="btn btn-secondary btn-sm" title="Open in new browser tab">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span>Open in Tab</span>
+          </a>
+          <a id="viewerDownloadBtn" href="#" download class="btn btn-primary btn-sm" title="Download this PDF">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Download</span>
+          </a>
+          <button id="closeViewerBtn" class="icon-btn close-viewer-btn" aria-label="Close PDF Viewer" title="Close">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="pdf-frame-container">
+        <iframe id="pdfFrame" src="about:blank" title="PDF Document Viewer"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite">
+    <div class="toast-icon" id="toastIcon">✓</div>
+    <div class="toast-message" id="toastMessage">Downloaded successfully!</div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
