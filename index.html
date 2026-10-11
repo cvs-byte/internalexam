@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subject PDF Portal | View & Download</title>
-  <meta name="description" content="Access, view, and download subject PDF notes and lab programs easily.">
+  <title>Subject Document Portal | View & Download</title>
+  <meta name="description" content="Access, view, and download complete subject Word documents and lab programs without any data loss.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <!-- Offline-capable high-fidelity DOCX rendering libraries -->
+  <script src="lib/jszip.min.js"></script>
+  <script src="lib/docx-preview.min.js"></script>
 </head>
 <body data-theme="light">
-  <!-- Background glow accents -->
+  <!-- Background atmosphere -->
   <div class="bg-glow bg-glow-1"></div>
   <div class="bg-glow bg-glow-2"></div>
 
@@ -19,6 +22,7 @@
     <div class="container header-inner">
       <div class="brand">
         <div class="logo-icon">
+          <!-- Word doc icon -->
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
@@ -28,8 +32,8 @@
           </svg>
         </div>
         <div>
-          <h1 class="brand-title">DocuHub <span class="badge-pill">Subject Portal</span></h1>
-          <p class="brand-subtitle">Select a subject to view online or download</p>
+          <h1 class="brand-title">DocuHub <span class="badge-pill">Pure Data Edition</span></h1>
+          <p class="brand-subtitle">Subject Word Documents (.docx) — View online or download with zero data loss</p>
         </div>
       </div>
 
@@ -55,12 +59,12 @@
   </header>
 
   <main class="container main-content">
-    <!-- Interactive Prompt Banner -->
+    <!-- Quick Choice Selector Banner -->
     <section class="prompt-banner" id="topPromptBanner">
       <div class="banner-content">
         <div class="banner-badge">Quick Action Selector</div>
         <h2>What would you like to do?</h2>
-        <p>Choose a subject below, then decide whether you want to <strong>View</strong> it directly in your browser or <strong>Download</strong> the file to your device.</p>
+        <p>Select your subject document below, then choose whether to <strong>View Document</strong> directly in the high-fidelity reader or <strong>Download</strong> the pure Word file.</p>
         
         <div class="quick-selector-row">
           <div class="select-wrapper">
@@ -76,7 +80,7 @@
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
-              View PDF
+              View Document
             </button>
             <button id="quickDownloadBtn" class="btn btn-secondary" disabled>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -84,7 +88,7 @@
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-              Download PDF
+              Download Word (.docx)
             </button>
           </div>
         </div>
@@ -95,15 +99,15 @@
     <section class="subjects-section">
       <div class="section-toolbar">
         <div>
-          <h2 class="section-title">Available Subject Files</h2>
-          <p class="section-desc">Click any card to choose between viewing and downloading</p>
+          <h2 class="section-title">Available Subject Word Files</h2>
+          <p class="section-desc">Click any card to choose between viewing online and downloading</p>
         </div>
         <div class="search-box">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" id="searchInput" placeholder="Search subjects or topics..." aria-label="Search subjects">
+          <input type="text" id="searchInput" placeholder="Search subjects or programs..." aria-label="Search subjects">
         </div>
       </div>
 
@@ -113,7 +117,7 @@
     </section>
   </main>
 
-  <!-- Action Prompt Modal (Asks: View PDF or Download PDF?) -->
+  <!-- Action Prompt Modal (Asks: View Document or Download Document?) -->
   <div class="modal-backdrop" id="actionModal" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="modal-card">
       <button class="modal-close-btn" id="closeActionModalBtn" aria-label="Close dialog">
@@ -133,11 +137,11 @@
       <div class="modal-header-text">
         <span class="modal-tag" id="modalSubjectCode">SUBJECT CODE</span>
         <h3 class="modal-title" id="modalSubjectTitle">Subject Name</h3>
-        <p class="modal-filename" id="modalFilename">filename.pdf</p>
+        <p class="modal-filename" id="modalFilename">filename.docx</p>
       </div>
 
       <div class="choice-prompt-box">
-        <p class="choice-title">How would you like to access this file?</p>
+        <p class="choice-title">What would you like to do with this file?</p>
         
         <div class="action-choices">
           <button class="action-choice-card choice-view" id="modalViewActionBtn">
@@ -148,8 +152,8 @@
               </svg>
             </div>
             <div class="choice-text">
-              <strong>View PDF</strong>
-              <span>Open and read immediately in the online viewer</span>
+              <strong>View Document</strong>
+              <span>Open in high-fidelity browser reader (preserves formatting & images)</span>
             </div>
             <div class="choice-arrow">→</div>
           </button>
@@ -163,8 +167,8 @@
               </svg>
             </div>
             <div class="choice-text">
-              <strong>Download PDF</strong>
-              <span>Save a local copy to your phone or computer</span>
+              <strong>Download Word File (.docx)</strong>
+              <span>Save 100% original file to computer or phone</span>
             </div>
             <div class="choice-arrow">↓</div>
           </button>
@@ -177,33 +181,35 @@
     </div>
   </div>
 
-  <!-- In-app PDF Viewer Modal -->
-  <div class="modal-backdrop pdf-viewer-backdrop" id="pdfViewerModal" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="pdf-viewer-window">
-      <div class="pdf-viewer-header">
-        <div class="pdf-info">
-          <span class="pdf-tag" id="viewerSubjectTag">SUBJECT</span>
+  <!-- In-app Document Viewer Modal -->
+  <div class="modal-backdrop doc-viewer-backdrop" id="docViewerModal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="doc-viewer-window">
+      <div class="doc-viewer-header">
+        <div class="doc-info">
+          <span class="doc-tag" id="viewerSubjectTag">SUBJECT</span>
           <h3 class="viewer-title" id="viewerTitle">Document Title</h3>
         </div>
 
-        <div class="pdf-toolbar-actions">
-          <a id="viewerOpenTabBtn" href="#" target="_blank" class="btn btn-secondary btn-sm" title="Open in new browser tab">
+        <div class="doc-toolbar-actions">
+          <button id="viewerPrintBtn" class="btn btn-secondary btn-sm" title="Print document">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-              <polyline points="15 3 21 3 21 9"></polyline>
-              <line x1="10" y1="14" x2="21" y2="3"></line>
+              <polyline points="6 9 6 2 18 2 18 9"></polyline>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <rect x="6" y="14" width="12" height="8"></rect>
             </svg>
-            <span>Open in Tab</span>
-          </a>
-          <a id="viewerDownloadBtn" href="#" download class="btn btn-primary btn-sm" title="Download this PDF">
+            <span>Print</span>
+          </button>
+
+          <a id="viewerDownloadBtn" href="#" download class="btn btn-primary btn-sm" title="Download Word (.docx)">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            <span>Download</span>
+            <span>Download .docx</span>
           </a>
-          <button id="closeViewerBtn" class="icon-btn close-viewer-btn" aria-label="Close PDF Viewer" title="Close">
+
+          <button id="closeViewerBtn" class="icon-btn close-viewer-btn" aria-label="Close Document Viewer" title="Close">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -212,8 +218,14 @@
         </div>
       </div>
 
-      <div class="pdf-frame-container">
-        <iframe id="pdfFrame" src="about:blank" title="PDF Document Viewer"></iframe>
+      <div class="doc-render-container" id="docRenderContainer">
+        <!-- Render status & spinner -->
+        <div class="doc-loader" id="docLoader">
+          <div class="spinner"></div>
+          <p id="docLoaderText">Rendering Word document with full precision...</p>
+        </div>
+        <!-- Rendered docx target -->
+        <div id="docxContent" class="docx-rendered-target"></div>
       </div>
     </div>
   </div>

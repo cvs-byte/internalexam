@@ -1,19 +1,20 @@
 /**
- * Subject PDF Portal - Application Logic
+ * Subject Document Portal - Pure Word Data Edition
  */
 
-// Subject Data based on workspace PDF files
+// Subject Data pointing to the pure Word (.docx) files
 const SUBJECTS = [
   {
     id: "cv-ip",
     code: "CV & IP",
     title: "Computer Vision & Image Processing",
-    filename: "CV & IP WEEK PROGRAMS (1).pdf",
-    filesize: "24.1 KB",
-    description: "Weekly practical programs covering image filtering, edge detection, spatial transformations, and feature analysis.",
-    iconColor: "#4f46e5",
-    accentLight: "rgba(79, 70, 229, 0.12)",
-    iconSvg: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    filename: "cv&ip.docx",
+    filesize: "92.6 MB",
+    badge: "Full Word Manual",
+    description: "Complete practical programs, weekly lab exercises, step-by-step algorithms, and high-resolution diagram outputs with pure original data.",
+    iconColor: "#2563eb",
+    accentLight: "rgba(37, 99, 235, 0.12)",
+    iconSvg: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
       <circle cx="8.5" cy="8.5" r="1.5"></circle>
       <polyline points="21 15 16 10 5 21"></polyline>
@@ -23,9 +24,10 @@ const SUBJECTS = [
     id: "os-sp",
     code: "OS & SP",
     title: "Operating Systems & System Programming",
-    filename: "OS&SP Programs.pdf",
-    filesize: "38.0 KB",
-    description: "Comprehensive programs on process scheduling algorithms, inter-process communication, memory allocation, and POSIX threads.",
+    filename: "os&sp.docx",
+    filesize: "13.1 KB",
+    badge: "Pure Source Code",
+    description: "Complete process scheduling algorithms, inter-process communication (IPC), thread synchronization, and system calls with zero data loss.",
     iconColor: "#0284c7",
     accentLight: "rgba(2, 132, 199, 0.12)",
     iconSvg: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -45,9 +47,10 @@ const SUBJECTS = [
     id: "nlp",
     code: "NLP",
     title: "Natural Language Processing",
-    filename: "nlp.pdf",
-    filesize: "39.6 KB",
-    description: "Lab exercises and implementations for tokenization, stemming, POS tagging, N-gram modeling, and text processing pipelines.",
+    filename: "nlp.docx",
+    filesize: "13.1 KB",
+    badge: "Complete Programs",
+    description: "Lab exercises and implementations for tokenization, stemming, POS tagging, N-gram modeling, and text processing pipelines in full fidelity.",
     iconColor: "#7c3aed",
     accentLight: "rgba(124, 58, 237, 0.12)",
     iconSvg: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -61,6 +64,7 @@ const SUBJECTS = [
 // State
 let currentSelectedSubject = null;
 let activeModalSubject = null;
+let activeRenderAbort = null;
 
 // DOM Elements
 const subjectSelectDropdown = document.getElementById("subjectSelectDropdown");
@@ -81,14 +85,16 @@ const modalSubjectIcon = document.getElementById("modalSubjectIcon");
 const modalViewActionBtn = document.getElementById("modalViewActionBtn");
 const modalDownloadActionBtn = document.getElementById("modalDownloadActionBtn");
 
-// PDF Viewer Modal
-const pdfViewerModal = document.getElementById("pdfViewerModal");
+// Document Viewer Modal
+const docViewerModal = document.getElementById("docViewerModal");
 const closeViewerBtn = document.getElementById("closeViewerBtn");
 const viewerTitle = document.getElementById("viewerTitle");
 const viewerSubjectTag = document.getElementById("viewerSubjectTag");
-const viewerOpenTabBtn = document.getElementById("viewerOpenTabBtn");
+const viewerPrintBtn = document.getElementById("viewerPrintBtn");
 const viewerDownloadBtn = document.getElementById("viewerDownloadBtn");
-const pdfFrame = document.getElementById("pdfFrame");
+const docLoader = document.getElementById("docLoader");
+const docLoaderText = document.getElementById("docLoaderText");
+const docxContent = document.getElementById("docxContent");
 
 // Toast
 const toast = document.getElementById("toast");
@@ -101,10 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
   renderSubjectCards(SUBJECTS);
   setupEventListeners();
 
-  // If user opens the website, show prompt dialog automatically for the first subject
-  // or user can pick immediately!
+  // Set default subject selection for immediate 1-click usage
   setTimeout(() => {
-    // Select first subject by default in dropdown for swift 1-click usage
     if (SUBJECTS.length > 0) {
       subjectSelectDropdown.value = SUBJECTS[0].id;
       handleDropdownChange(SUBJECTS[0].id);
@@ -159,47 +163,46 @@ function renderSubjectCards(list) {
           ${sub.filesize}
         </span>
         <span>•</span>
-        <span>PDF Document</span>
+        <span>Word Document (.docx)</span>
       </div>
       <div class="card-actions">
-        <button class="btn btn-card-view" data-action="view" data-id="${sub.id}" title="View PDF">
+        <button class="btn btn-card-view" data-action="view" data-id="${sub.id}" title="View Document">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
-          View PDF
+          View Doc
         </button>
-        <button class="btn btn-card-download" data-action="download" data-id="${sub.id}" title="Download PDF">
+        <button class="btn btn-card-download" data-action="download" data-id="${sub.id}" title="Download Word (.docx)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7 10 12 15 17 10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          Download PDF
+          Download .docx
         </button>
       </div>
     `;
 
     // Clicking card opens the choice prompt modal
     card.addEventListener("click", (e) => {
-      // Check if button inside card was clicked directly
       const btn = e.target.closest("button");
       if (btn) {
         const action = btn.getAttribute("data-action");
         if (action === "view") {
           e.stopPropagation();
-          viewPdf(sub);
+          viewDocument(sub);
           return;
         } else if (action === "download") {
           e.stopPropagation();
-          downloadPdf(sub);
+          downloadDocument(sub);
           return;
         }
       }
       openActionModal(sub);
     });
 
-    // Keyboard support for card
+    // Keyboard accessibility
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         if (!e.target.closest("button")) {
@@ -223,13 +226,13 @@ function setupEventListeners() {
   // Quick Action buttons from top banner
   quickViewBtn.addEventListener("click", () => {
     if (currentSelectedSubject) {
-      viewPdf(currentSelectedSubject);
+      viewDocument(currentSelectedSubject);
     }
   });
 
   quickDownloadBtn.addEventListener("click", () => {
     if (currentSelectedSubject) {
-      downloadPdf(currentSelectedSubject);
+      downloadDocument(currentSelectedSubject);
     }
   });
 
@@ -256,7 +259,7 @@ function setupEventListeners() {
     if (activeModalSubject) {
       const subject = activeModalSubject;
       closeActionModal();
-      viewPdf(subject);
+      viewDocument(subject);
     }
   });
 
@@ -264,21 +267,25 @@ function setupEventListeners() {
     if (activeModalSubject) {
       const subject = activeModalSubject;
       closeActionModal();
-      downloadPdf(subject);
+      downloadDocument(subject);
     }
   });
 
-  // PDF Viewer Modal controls
-  closeViewerBtn.addEventListener("click", closePdfViewer);
-  pdfViewerModal.addEventListener("click", (e) => {
-    if (e.target === pdfViewerModal) closePdfViewer();
+  // Document Viewer Modal controls
+  closeViewerBtn.addEventListener("click", closeDocViewer);
+  docViewerModal.addEventListener("click", (e) => {
+    if (e.target === docViewerModal) closeDocViewer();
+  });
+
+  viewerPrintBtn.addEventListener("click", () => {
+    window.print();
   });
 
   // Keyboard navigation
   window.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeActionModal();
-      closePdfViewer();
+      closeDocViewer();
     }
   });
 
@@ -295,7 +302,7 @@ function handleDropdownChange(subjectId) {
   }
 }
 
-// Open Choice Prompt Modal
+// Open Action Prompt Modal
 function openActionModal(subject) {
   activeModalSubject = subject;
   modalSubjectTitle.textContent = subject.title;
@@ -314,42 +321,103 @@ function closeActionModal() {
   activeModalSubject = null;
 }
 
-// View PDF in in-app modal viewer
-function viewPdf(subject) {
-  // Encode URI to safely handle special characters like spaces and parentheses
+// High-fidelity Word Document Viewer
+async function viewDocument(subject) {
   const encodedPath = encodeURI(subject.filename);
 
   viewerTitle.textContent = `${subject.title} — ${subject.filename}`;
   viewerSubjectTag.textContent = subject.code;
   
-  // Set toolbar links
-  viewerOpenTabBtn.href = encodedPath;
+  // Set toolbar download link
   viewerDownloadBtn.href = `${encodedPath}?download=1`;
   viewerDownloadBtn.setAttribute("download", subject.filename);
 
-  // Load in iframe
-  pdfFrame.src = encodedPath;
-
   // Open viewer modal
-  pdfViewerModal.classList.add("open");
-  pdfViewerModal.setAttribute("aria-hidden", "false");
+  docViewerModal.classList.add("open");
+  docViewerModal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
 
-  showToast(`Viewing ${subject.code} PDF in reader`);
+  // Reset content & show loader
+  docxContent.innerHTML = "";
+  docLoader.classList.add("active");
+  docLoaderText.textContent = `Loading ${subject.title} (${subject.filesize})...`;
+
+  try {
+    const response = await fetch(encodedPath);
+    if (!response.ok) {
+      throw new Error(`Failed to load file: ${response.status} ${response.statusText}`);
+    }
+
+    docLoaderText.textContent = "Rendering Word document formatting & figures...";
+    const blob = await response.blob();
+
+    // Check if docx-preview library is loaded
+    if (window.docx && typeof window.docx.renderAsync === "function") {
+      await window.docx.renderAsync(blob, docxContent, null, {
+        className: "docx",
+        inWrapper: true,
+        ignoreWidth: false,
+        ignoreHeight: false,
+        renderHeaders: true,
+        renderFooters: true,
+        renderFootnotes: true,
+        renderEndnotes: true,
+        useBase64URL: true
+      });
+      docLoader.classList.remove("active");
+      showToast(`Rendered ${subject.code} successfully!`);
+    } else {
+      // Fallback if docx library couldn't be loaded
+      renderFallbackViewer(subject);
+    }
+  } catch (error) {
+    console.error("Error rendering document:", error);
+    docLoader.classList.remove("active");
+    docxContent.innerHTML = `
+      <div style="background: #ffffff; color: #1e293b; padding: 2.5rem; border-radius: 8px; max-width: 650px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <h3 style="margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 700;">Document Ready for Direct Access</h3>
+        <p style="color: #64748b; margin-bottom: 1.5rem; font-size: 0.95rem;">
+          This document (${subject.filesize}) contains high-resolution data. You can download the pure .docx file directly to view in Microsoft Word with 100% precision.
+        </p>
+        <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+          <a href="${encodedPath}?download=1" download="${subject.filename}" class="btn btn-primary">
+            Download ${subject.filename}
+          </a>
+        </div>
+      </div>
+    `;
+    showToast(`Notice: Large file ready for download`);
+  }
 }
 
-function closePdfViewer() {
-  pdfViewerModal.classList.remove("open");
-  pdfViewerModal.setAttribute("aria-hidden", "true");
-  pdfFrame.src = "about:blank";
+function renderFallbackViewer(subject) {
+  docLoader.classList.remove("active");
+  const encodedPath = encodeURI(subject.filename);
+  docxContent.innerHTML = `
+    <div style="background: #ffffff; color: #1e293b; padding: 2.5rem; border-radius: 8px; max-width: 650px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+      <h3 style="margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 700;">${subject.title}</h3>
+      <p style="color: #64748b; margin-bottom: 1.5rem; font-size: 0.95rem;">
+        File: <strong>${subject.filename}</strong> (${subject.filesize})
+      </p>
+      <a href="${encodedPath}?download=1" download="${subject.filename}" class="btn btn-primary">
+        Download Word File (.docx)
+      </a>
+    </div>
+  `;
+}
+
+function closeDocViewer() {
+  docViewerModal.classList.remove("open");
+  docViewerModal.setAttribute("aria-hidden", "true");
+  docxContent.innerHTML = "";
+  docLoader.classList.remove("active");
   document.body.style.overflow = "";
 }
 
-// Download PDF directly
-function downloadPdf(subject) {
+// Download Word document directly (100% original binary, zero data loss)
+function downloadDocument(subject) {
   const encodedPath = encodeURI(subject.filename) + "?download=1";
   
-  // Create virtual link to trigger download cleanly
   const link = document.createElement("a");
   link.href = encodedPath;
   link.setAttribute("download", subject.filename);
@@ -357,7 +425,7 @@ function downloadPdf(subject) {
   link.click();
   document.body.removeChild(link);
 
-  showToast(`Downloading "${subject.filename}"...`);
+  showToast(`Downloading "${subject.filename}" with pure data...`);
 }
 
 // Toast notification helper
