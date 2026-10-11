@@ -17,7 +17,13 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-  let decodedUrl = decodeURI(req.url.split('?')[0]);
+  let rawPath = req.url.split('?')[0];
+  let decodedUrl;
+  try {
+    decodedUrl = decodeURIComponent(rawPath);
+  } catch (e) {
+    decodedUrl = decodeURI(rawPath);
+  }
   if (decodedUrl === '/') decodedUrl = '/index.html';
 
   const filePath = path.join(__dirname, decodedUrl);

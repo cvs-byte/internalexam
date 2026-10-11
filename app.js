@@ -8,8 +8,8 @@ const SUBJECTS = [
     id: "cv-ip",
     code: "CV & IP",
     title: "Computer Vision & Image Processing",
-    filename: "cv&ip.docx",
-    filesize: "92.6 MB",
+    filename: "cv&iplabmanual.docx",
+    filesize: "74.9 MB",
     badge: "Full Word Manual",
     description: "Complete practical programs, weekly lab exercises, step-by-step algorithms, and high-resolution diagram outputs with pure original data.",
     iconColor: "#2563eb",
@@ -24,9 +24,9 @@ const SUBJECTS = [
     id: "os-sp",
     code: "OS & SP",
     title: "Operating Systems & System Programming",
-    filename: "os&sp.docx",
-    filesize: "13.1 KB",
-    badge: "Pure Source Code",
+    filename: "OS&SP Programs 8,9,10 week.docx",
+    filesize: "26.8 KB",
+    badge: "Programs 8, 9, 10 Week",
     description: "Complete process scheduling algorithms, inter-process communication (IPC), thread synchronization, and system calls with zero data loss.",
     iconColor: "#0284c7",
     accentLight: "rgba(2, 132, 199, 0.12)",
@@ -321,9 +321,12 @@ function closeActionModal() {
   activeModalSubject = null;
 }
 
+// In-memory blob cache for instant re-opening
+const documentBlobCache = new Map();
+
 // High-fidelity Word Document Viewer
 async function viewDocument(subject) {
-  const encodedPath = encodeURI(subject.filename);
+  const encodedPath = encodeURIComponent(subject.filename);
 
   viewerTitle.textContent = `${subject.title} — ${subject.filename}`;
   viewerSubjectTag.textContent = subject.code;
@@ -343,13 +346,39 @@ async function viewDocument(subject) {
   docLoaderText.textContent = `Loading ${subject.title} (${subject.filesize})...`;
 
   try {
-    const response = await fetch(encodedPath);
-    if (!response.ok) {
-      throw new Error(`Failed to load file: ${response.status} ${response.statusText}`);
+    let blob;
+    if (documentBlobCache.has(encodedPath)) {
+      blob = documentBlobCache.get(encodedPath);
+    } else {
+      const response = await fetch(encodedPath);
+      if (!response.ok) {
+        throw new Error(`Failed to load file: ${response.status} ${response.statusText}`);
+      }
+
+      const contentLength = response.headers.get("content-length");
+      const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
+
+      if (response.body && totalBytes > 0 && typeof ReadableStream !== "undefined") {
+        const reader = response.body.getReader();
+        let receivedBytes = 0;
+        const chunks = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          receivedBytes += value.length;
+          const mb = (receivedBytes / (1024 * 1024)).toFixed(1);
+          const totalMb = (totalBytes / (1024 * 1024)).toFixed(1);
+          docLoaderText.textContent = `Loading document: ${mb} MB / ${totalMb} MB...`;
+        }
+        blob = new Blob(chunks, { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+      } else {
+        blob = await response.blob();
+      }
+      documentBlobCache.set(encodedPath, blob);
     }
 
-    docLoaderText.textContent = "Rendering Word document formatting & figures...";
-    const blob = await response.blob();
+    docLoaderText.textContent = "Rendering document pages & figures...";
 
     // Check if docx-preview library is loaded
     if (window.docx && typeof window.docx.renderAsync === "function") {
@@ -358,11 +387,14 @@ async function viewDocument(subject) {
         inWrapper: true,
         ignoreWidth: false,
         ignoreHeight: false,
+        ignoreFonts: true,
+        breakPages: true,
+        ignoreLastRenderedPageBreak: true,
         renderHeaders: true,
         renderFooters: true,
         renderFootnotes: true,
         renderEndnotes: true,
-        useBase64URL: true
+        useBase64URL: false
       });
       docLoader.classList.remove("active");
       showToast(`Rendered ${subject.code} successfully!`);
@@ -392,7 +424,7 @@ async function viewDocument(subject) {
 
 function renderFallbackViewer(subject) {
   docLoader.classList.remove("active");
-  const encodedPath = encodeURI(subject.filename);
+  const encodedPath = encodeURIComponent(subject.filename);
   docxContent.innerHTML = `
     <div style="background: #ffffff; color: #1e293b; padding: 2.5rem; border-radius: 8px; max-width: 650px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
       <h3 style="margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 700;">${subject.title}</h3>
@@ -416,7 +448,7 @@ function closeDocViewer() {
 
 // Download Word document directly (100% original binary, zero data loss)
 function downloadDocument(subject) {
-  const encodedPath = encodeURI(subject.filename) + "?download=1";
+  const encodedPath = encodeURIComponent(subject.filename) + "?download=1";
   
   const link = document.createElement("a");
   link.href = encodedPath;
