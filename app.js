@@ -5,19 +5,19 @@
 // Subject Data pointing to the pure Word (.docx) files
 const SUBJECTS = [
   {
-    id: "cv-ip",
-    code: "CV & IP",
-    title: "Computer Vision & Image Processing",
-    filename: "cv&iplabmanual.docx",
-    filesize: "74.9 MB",
-    badge: "Full Word Manual",
-    description: "Complete practical programs, weekly lab exercises, step-by-step algorithms, and high-resolution diagram outputs with pure original data.",
-    iconColor: "#2563eb",
-    accentLight: "rgba(37, 99, 235, 0.12)",
-    iconSvg: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-      <circle cx="8.5" cy="8.5" r="1.5"></circle>
-      <polyline points="21 15 16 10 5 21"></polyline>
+    id: "fsd-ii",
+    code: "FSD - II",
+    title: "Full Stack Development - II",
+    filename: "R23 FSD - II Lab Manuaul.docx",
+    filesize: "132.5 KB",
+    badge: "R23 Lab Manual",
+    description: "Complete practical manual covering modern JavaScript, DOM manipulation, event handling, asynchronous programming, Node.js, and Full Stack applications.",
+    iconColor: "#059669",
+    accentLight: "rgba(5, 150, 105, 0.12)",
+    iconSvg: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="16 18 22 12 16 6"></polyline>
+      <polyline points="8 6 2 12 8 18"></polyline>
+      <line x1="14" y1="4" x2="10" y2="20"></line>
     </svg>`
   },
   {
